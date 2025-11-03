@@ -1,7 +1,76 @@
 import 'dotenv/config'; // Loads .env file variables for local testing
 
+// --- THIS IS THE FULL JSON SCHEMA WE WILL ASK THE AI TO FOLLOW ---
+// We define it here so we can include it in the prompt.
+// NEW: Added "googleMapsQuery"
+const aiResponseSchemaText = `{
+    "type": "OBJECT",
+    "properties": {
+        "planTitle": { "type": "STRING" },
+        "planDates": { "type": "STRING" },
+        "atAGlance": {
+            "type": "OBJECT",
+            "properties": {
+                "weatherVibe": { "type": "STRING" },
+                "dosAndDonts": {
+                    "type": "ARRAY",
+                    "items": { "type": "OBJECT", "properties": { "isDo": { "type": "BOOLEAN" }, "text": { "type": "STRING" } } }
+                }
+            }
+        },
+        "dailyItinerary": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "day": { "type": "STRING" },
+                    "focus": { "type": "STRING" },
+                    "routeSummary": { "type": "STRING" },
+                    "timelineItems": {
+                        "type": "ARRAY",
+                        "items": {
+                            "type": "OBJECT",
+                            "properties": {
+                                "time": { "type": "STRING" },
+                                "title": { "type": "STRING" },
+                                "description": { "type": "STRING" },
+                                "googleMapsQuery": { "type": "STRING" },
+                                "isFoodiePick": { "type": "BOOLEAN" },
+                                "tags": { "type": "ARRAY", "items": { "type": "STRING" } },
+                                "walkingDistance": { "type": "STRING" },
+                                "transportDetails": { "type": "STRING" },
+                                "estimatedCost": { "type": "STRING" }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "packingList": {
+            "type": "OBJECT",
+            "properties": {
+                "clothing": { "type": "ARRAY", "items": { "type": "STRING" } },
+                "essentials": { "type": "ARRAY", "items": { "type": "STRING" } },
+                "other": { "type": "ARRAY", "items": { "type": "STRING" } }
+            }
+        },
+        "foodGuide": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "name": { "type": "STRING" },
+                    "type": { "type": "STRING" },
+                    "description": { "type": "STRING" },
+                    "estimatedPrice": { "type": "STRING" }
+                }
+            }
+        }
+    }
+}`;
+
+
 // This helper function builds the prompt from all the form data.
-// It's the "brain" that translates your form into a request for the AI.
 function buildMegaprompt(formData) {
     // --- Helper functions to make the prompt smarter ---
     function buildFamilyPrompt(data) {
@@ -61,7 +130,7 @@ function buildMegaprompt(formData) {
     // --- Main Prompt Assembly ---
     let prompt = `You are 'Vivid', a world-class AI travel concierge. Your expertise is in creating hyper-personalized, authentic, and logistically sound travel plans.
 
-Your ENTIRE response MUST be a single, valid JSON object. Do NOT include any text before or after the JSON.
+Your ENTIRE response MUST be a single, valid JSON object. Do NOT include any text, markdown formatting, or "json" tags before or after the JSON.
 You must respond in the language with this code: ${formData.lang || 'en'}.
 Generate a complete, multi-day travel plan based on the following user data.
 
@@ -85,7 +154,7 @@ ${buildFamilyPrompt(formData)}
 
 **Daily Rhythm:**
 * **Daily Start Time:** ${buildStartTimePrompt(formData.startTime)}
-* **Daily End Time:** ${buildEndTimePrompt(formData.endTime)}
+* **Daily End Time:** ${buildEndTimePrompt(formData.endTime)} 
 * **Plan Structure:** ${buildStructurePrompt(formData.structure)}
 
 **Interests & Preferences:**
@@ -96,106 +165,37 @@ ${buildSubInterestPrompt(formData)}
 * **Dietary Needs:** ${formData.diet ? formData.diet.join(', ') : 'None specified.'}
 
 ---
-### CRITICAL INSTRUCTIONS (NEW)
+### CRITICAL INSTRUCTIONS
 ---
-You MUST use your Google Search tool to find hyper-specific, real-world information. "Generic" answers are forbidden.
+You MUST use your Google Search tool to find hyper-specific, real-world information. "Inventing" details is forbidden.
 
 1.  **TRANSPORT:**
     * **BAD:** "Take public transport to Taksim."
     * **GOOD:** "From your hotel in Kağıthane, walk 5 minutes to the 'Kağıthane Park' bus stop. Take bus **48N** (direction Taksim). Get off at the 'Taksim' stop (approx. 8 stops, 25 mins)."
-    * **ACTION:** You MUST find actual bus, tram, or metro line numbers and real stop names.
+    * **ACTION:** You MUST search for and use actual bus, tram, or metro line numbers and real stop names.
 2.  **COSTS:**
     * **BAD:** "A bus ticket is cheap."
     * **GOOD:** "The bus fare is approx. **40 TL** (you must use an IstanbulKart)."
-    * **ACTION:** You MUST search for and provide estimated costs for transport, tickets, and meals in the local currency.
+    * **ACTION:** You MUST search for and provide real, estimated costs for transport, tickets, and meals in the local currency.
 3.  **RESTAURANTS:**
     * **BAD:** "Find a local restaurant for meatballs."
     * **GOOD:** "Go to **'Tarihi Sultanahmet Köftecisi Selim Usta'**. It's a 2-min walk from the Blue Mosque."
-    * **ACTION:** You MUST recommend specific, real restaurant names that match the user's budget and diet.
+    * **ACTION:** You MUST search for and recommend specific, real restaurant names that match the user's budget and diet.
 4.  **DIRECTIONS:**
     * **BAD:** "Walk to Istiklal Caddesi."
     * **GOOD:** "From Taksim Square, walk 2 minutes south to the start of Istiklal Caddesi."
     * **ACTION:** Provide clear, simple walking directions (e.g., "Walk 5 minutes...", "It's a 2km walk...") between stops.
+5.  **NEW: MAPS QUERY:**
+    * **ACTION:** For *every* timeline item, you MUST provide a "googleMapsQuery" field. This must be a clean, URL-friendly search query for the location (e.g., "Tarihi Sultanahmet Koftecisi Selim Usta, Istanbul" or "Hagia Sophia, Istanbul, Turkey").
 
-Generate a JSON object matching the schema I provide. Be detailed and specific.
+---
+### REQUIRED JSON FORMAT
+---
+Your entire response must be a single JSON object matching this schema. Do not add any other text.
+${aiResponseSchemaText}
 `;
     return prompt;
 }
-
-// --- UPDATED JSON SCHEMA ---
-// I've added "transportDetails" and "estimatedCost" to the timeline
-// and "estimatedPrice" to the food guide.
-const aiResponseSchema = {
-    "type": "OBJECT",
-    "properties": {
-        "planTitle": { "type": "STRING" },
-        "planDates": { "type": "STRING" },
-        "atAGlance": {
-            "type": "OBJECT",
-            "properties": {
-                "weatherVibe": { "type": "STRING" },
-                "dosAndDonts": {
-                    "type": "ARRAY",
-                    "items": {
-                        "type": "OBJECT",
-                        "properties": {
-                            "isDo": { "type": "BOOLEAN" },
-                            "text": { "type": "STRING" }
-                        }
-                    }
-                }
-            }
-        },
-        "dailyItinerary": {
-            "type": "ARRAY",
-            "items": {
-                "type": "OBJECT",
-                "properties": {
-                    "day": { "type": "STRING" },
-                    "focus": { "type": "STRING" },
-                    "routeSummary": { "type": "STRING" },
-                    "timelineItems": {
-                        "type": "ARRAY",
-                        "items": {
-                            "type": "OBJECT",
-                            "properties": {
-                                "time": { "type": "STRING" },
-                                "title": { "type": "STRING" },
-                                "description": { "type": "STRING" },
-                                "isFoodiePick": { "type": "BOOLEAN" },
-                                "tags": { "type": "ARRAY", "items": { "type": "STRING" } },
-                                "walkingDistance": { "type": "STRING" },
-                                "transportDetails": { "type": "STRING" }, // NEW
-                                "estimatedCost": { "type": "STRING" } // NEW
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "packingList": {
-            "type": "OBJECT",
-            "properties": {
-                "clothing": { "type": "ARRAY", "items": { "type": "STRING" } },
-                "essentials": { "type": "ARRAY", "items": { "type": "STRING" } },
-                "other": { "type": "ARRAY", "items": { "type": "STRING" } }
-            }
-        },
-        "foodGuide": {
-            "type": "ARRAY",
-            "items": {
-                "type": "OBJECT",
-                "properties": {
-                    "name": { "type": "STRING" },
-                    "type": { "type": "STRING" },
-                    "description": { "type": "STRING" },
-                    "estimatedPrice": { "type": "STRING" } // NEW
-                }
-            }
-        }
-    }
-};
-
 
 // --- The Vercel Handler Function ---
 export default async function handler(request, response) {
@@ -223,28 +223,29 @@ export default async function handler(request, response) {
         
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
-        console.log("[API] Calling Google Gemini API...");
+        console.log("[API] Calling Google Gemini API with Google Search enabled...");
         
         // --- UPDATED PAYLOAD ---
-        // We are now enabling the Google Search tool AND
-        // forcing the AI to respond with our JSON schema.
+        // We have ADDED the "tools" key and REMOVED "responseMimeType" and "responseSchema".
+        // The prompt itself now contains the JSON schema instructions.
         const payload = {
             contents: [{
                 parts: [{ text: finalPrompt }]
             }],
-            // NEW: Add the Google Search tool
             tools: [{
                 "google_search": {}
             }],
             generationConfig: {
-                responseMimeType: "application/json",
-                responseSchema: aiResponseSchema,
-                temperature: 0.7, // Slightly lower temp for more factual answers
-                topK: 1,
-                topP: 1,
-                maxOutputTokens: 8192,
-            }
-        };
+                // We cannot use JSON mode + Tools, so we rely on the prompt
+        // and our string cleaning logic.
+        temperature: 0.7, 
+        topK: 1,
+        topP: 1,
+        // --- THIS IS THE FIX ---
+        // Increased token limit to allow for longer, more detailed plans.
+        maxOutputTokens: 16384,
+    }
+};
 
         const apiResponse = await fetch(url, {
             method: 'POST',
@@ -270,6 +271,7 @@ export default async function handler(request, response) {
         }
 
         // --- FIX: CLEAN THE JSON ---
+        // This is now CRITICAL because we are not in JSON-only mode.
         const jsonStartIndex = generatedText.indexOf('{');
         const jsonEndIndex = generatedText.lastIndexOf('}');
         
