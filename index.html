@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vivid - Stop planning, start experiencing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Load translations.js before the main script -->
+    <script src="translations.js"></script>
+</head>
+<body>
+    <header class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            
+            <div class="language-selector-wrapper">
+                <select id="language-selector">
+                    <option value="en">English (EN)</option>
+                    <option value="tr">Türkçe (TR)</option>
+                </select>
+            </div>
+
+            <div class="logo">vivid</div>
+
+            <div class="form-container">
+                
+                <div class="progress-bar">
+                    <div class="progress-step active" data-step="1"></div>
+                    <div class="progress-step" data-step="2"></div>
+                    <div class="progress-step" data-step="3"></div>
+                    <div class="progress-step" data-step="4"></div>
+                </div>
+
+                <form id="trip-form">
+                    
+                    <!-- Step 1: The Core Trip -->
+                    <div class="form-step active" data-step="1">
+                        <h2 data-translate-key="step1_title">Let's build your perfect trip.</h2>
+                        <p class="step-subheading" data-translate-key="step1_subheading">To start, tell us the core details of your trip.</p>
+                        
+                        <div class="form-group">
+                            <label for="destination" data-translate-key="label_destination">Where are you heading?</label>
+                            <input type="text" id="destination" data-translate-placeholder="placeholder_destination" placeholder="e.g., Istanbul, Turkey" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="start-date" data-translate-key="label_start_date">Start Date</label>
+                                <input type="date" id="start-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="end-date" data-translate-key="label_end_date">End Date</label>
+                                <input type="date" id="end-date" required>
+                            </div>
+                        </div>
+                         <div class="form-group">
+                            <label for="accommodation" data-translate-key="label_accommodation">Where are you staying?</label>
+                            <input type="text" id="accommodation" data-translate-placeholder="placeholder_accommodation" placeholder="Hotel name or neighborhood (e.g., 'Karaköy')" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="arrival-time" data-translate-key="label_arrival">Arrival Time (Optional)</label>
+                                <select id="arrival-time">
+                                    <option value="" selected data-translate-key="option_not_sure">I'm not sure</option>
+                                    <option value="morning" data-translate-key="option_morning_arrival">Morning (8AM - 12PM)</option>
+                                    <option value="afternoon" data-translate-key="option_afternoon_arrival">Afternoon (12PM - 5PM)</option>
+                                    <option value="evening" data-translate-key="option_evening_arrival">Evening (5PM - 9PM)</option>
+                                    <option value="late" data-translate-key="option_late_arrival">Late Night (After 9PM)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="departure-time" data-translate-key="label_departure">Departure Time (Optional)</label>
+                                <select id="departure-time">
+                                    <option value="" selected data-translate-key="option_not_sure">I'm not sure</option>
+                                    <option value="morning" data-translate-key="option_morning_departure">Morning (8AM - 12PM)</option>
+                                    <option value="afternoon" data-translate-key="option_afternoon_departure">Afternoon (12PM - 5PM)</option>
+                                    <option value="evening" data-translate-key="option_evening_departure">Evening (5PM - 9PM)</option>
+                                    <option value="late" data-translate-key="option_late_departure">Late Night (After 9PM)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Travel Style -->
+                    <div class="form-step" data-step="2">
+                        <h2 data-translate-key="step2_title">Your travel style.</h2>
+                        <p class="step-subheading" data-translate-key="step2_subheading">This helps us tailor the vibe and budget of your plan.</p>
+
+                        <div class="form-group">
+                            <label data-translate-key="label_who">Who are you traveling with?</label>
+                            <div class="card-select-group" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+                                <label class="card-option">
+                                    <input type="radio" name="travelWith" value="solo" checked onclick="toggleChildOptions(this)">
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5.5 17.5c0-2.8 2-5 4.5-5s4.5 2.2 4.5 5v2H5.5v-2z"></path><circle cx="10" cy="7.5" r="2.5"></circle></svg>
+                                        <strong data-translate-key="who_solo">Solo</strong>
+                                    </div>
+                                </label>
+                                <label class="card-option">
+                                    <input type="radio" name="travelWith" value="partner" onclick="toggleChildOptions(this)">
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 19.5V16c0-2.2-1.8-4-4-4s-4 1.8-4 4v3.5"></path><path d="M14 16c0 2.2 1.8 4 4 4V10c0-2.2-1.8-4-4-4"></path><path d="M10 16c0 2.2-1.8 4-4 4V10c0-2.2 1.8-4 4-4"></path><circle cx="10" cy="6" r="2"></circle><circle cx="14" cy="6" r="2"></circle></svg>
+                                        <strong data-translate-key="who_partner">Partner</strong>
+                                    </div>
+                                </label>
+                                <label class="card-option">
+                                    <input type="radio" name="travelWith" value="friends" onclick="toggleChildOptions(this)">
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2c0-2.2-1.8-4-4-4H5c-2.2 0-4 1.8-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><path d="M17 11c1.7 0 3 1.3 3 3v2"></path><path d="M21 11c1.7 0 3 1.3 3 3v2"></path></svg>
+                                        <strong data-translate-key="who_friends">Friends</strong>
+                                    </div>
+                                </label>
+                                <label class="card-option">
+                                    <input type="radio" name="travelWith" value="family" onclick="toggleChildOptions(this)">
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 0-4 4v2c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V6a4 4 0 0 0-4-4z"></path><path d="M17.5 14c-1.8 0-3.4 1.3-3.9 3H10c-.5-1.7-2.1-3-3.9-3C3.9 14 2 15.9 2 18.2V22h20v-3.8c0-2.3-1.9-4.2-4.2-4.2z"></path></svg>
+                                        <strong data-translate-key="who_family">Family (with kids)</strong>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Child Options Section -->
+                        <div id="child-options">
+                            <label class="checkbox-label" style="margin-bottom: 15px;">
+                                <input type="checkbox" name="child-activities">
+                                <span data-translate-key="child_activities">Prioritize child-friendly activities?</span>
+                            </label>
+                            <div class="form-group">
+                                <label for="child-special-requests" data-translate-key="child_special_requests">Any special requests?</label>
+                                <textarea id="child-special-requests" data-translate-placeholder="placeholder_child_requests" placeholder="e.g., 'Stroller-friendly routes', 'Need a 2 PM nap break'"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label" style="padding: 16px;">
+                                <input type="checkbox" name="occasion">
+                                <span data-translate-key="special_occasion">🎉 This is for a special occasion (Birthday, Anniversary, etc.)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label data-translate-key="label_budget">Daily Budget (Per Person, Excl. Hotel)</label>
+                            <div class="card-select-group" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+                                <label class="card-option">
+                                    <input type="radio" name="budget" value="low" onclick="toggleCustomBudget(this)">
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2z"></path><path d="M12 6v12"></path><path d="M16 9l-4 4-4-4"></path></svg>
+                                        <strong data-translate-key="budget_low">Backpacker</strong>
+                                        <span>($)</span>
+                                    </div>
+                                </label>
+                                <label class="card-option">
+                                    <input type="radio" name="budget" value="medium" checked onclick="toggleCustomBudget(this)">
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2z"></path><path d="M12 6v12"></path><path d="M16 9l-4 4-4-4"></path></svg>
+                                        <strong data-translate-key="budget_medium">Standard</strong>
+                                        <span>($$)</span>
+                                    </div>
+                                </label>
+                                <label class="card-option">
+                                    <input type="radio" name="budget" value="high" onclick="toggleCustomBudget(this)">
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2z"></path><path d="M12 6v12"></path><path d="M16 9l-4 4-4-4"></path></svg>
+                                        <strong data-translate-key="budget_high">Premium</strong>
+                                        <span>($$$)</span>
+                                    </div>
+                                </label>
+                                <label class="card-option">
+                                    <input type="radio" name="budget" value="custom" onclick="toggleCustomBudget(this)">
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4v7l6 6 7-7-6-6z"></path><path d="M9 10a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"></path><path d="M18 10h2v2h-2zM18 14h2v2h-2zM18 6h2v2h-2z"></path></svg>
+                                        <strong data-translate-key="budget_custom">Custom</strong>
+                                        <span data-translate-key="budget_custom_span">(Enter amount)</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="custom-budget-input">
+                            <div class="form-group">
+                                <label for="custom-budget-amount" data-translate-key="label_custom_budget">Approx. budget per day (USD)</label>
+                                <input type="number" id="custom-budget-amount" data-translate-placeholder="placeholder_custom_budget" placeholder="e.g., 150">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label data-translate-key="label_mobility">Mobility Style</label>
+                            <div class="card-select-group">
+                                <label class="card-option">
+                                    <input type="radio" name="mobility" value="low">
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 18c.6 0 1-.4 1-1s-.4-1-1-1-1 .4-1 1 .4 1 1 1zM7 18c.6 0 1-.4 1-1s-.4-1-1-1-1 .4-1 1 .4 1 1 1z"></path><path d="M15 8.35V6a3 3 0 0 0-3-3H9a3 3 0 0 0-3 3v5.17l-1.5 1.5H1v2h2.2l1.1-1.1 2.9 2.9.8.8H15v-3.7l-1.8-3.35z"></path></svg>
+                                        <strong data-translate-key="mobility_low">Accessible</strong>
+                                        <span data-translate-key="mobility_low_span">(Taxis / low walking)</span>
+                                    </div>
+                                </label>
+                                <label class="card-option">
+                                    <input type="radio" name="mobility" value="medium" checked>
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5.08V2.15c0-1.1.9-2 2-2s2 .9 2 2v2.93"></path><path d="M16 4.38c3.2 1.13 5.4 4.04 5.4 7.62 0 4.42-3.6 8-8 8s-8-3.58-8-8c0-3.58 2.2-6.49 5.4-7.62"></path><path d="M16 11.41a4 4 0 1 0-8 0 4 4 0 0 0 8 0z"></path></svg>
+                                        <strong data-translate-key="mobility_medium">Moderate Pace</strong>
+                                        <span data-translate-key="mobility_medium_span">(10k steps)</span>
+                                    </div>
+                                </label>
+                                <label class="card-option">
+                                    <input type="radio" name="mobility" value="high">
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+                                        <strong data-translate-key="mobility_high">Walk All Day</strong>
+                                        <span data-translate-key="mobility_high_span">(15k+ steps)</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Daily Rhythm -->
+                    <div class="form-step" data-step="3">
+                        <h2 data-translate-key="step3_title">Your daily rhythm.</h2>
+                        <p class="step-subheading" data-translate-key="step3_subheading">Are you an early bird? Do you like a tight schedule?</p>
+                        
+                        <div class="form-group">
+                            <label data-translate-key="label_start_time">I'm an...</label>
+                            <div class="card-select-group">
+                                <label class="card-option">
+                                    <input type="radio" name="start-time" value="early">
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5v14"></path><path d="M19 12a7 7 0 1 1-14 0 7 7 0 0 1 14 0z"></path></svg>
+                                        <strong data-translate-key="start_early">Early Bird</strong>
+                                        <span data-translate-key="start_early_span">(Start at 8 AM)</span>
+                                    </div>
+                                </label>
+                                <label class="card-option">
+                                    <input type="radio" name="start-time" value="normal" checked>
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"></path><path d="M12 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path></svg>
+                                        <strong data-translate-key="start_normal">Avg. Riser</strong>
+                                        <span data-translate-key="start_normal_span">(Start 9-10 AM)</span>
+                                    </div>
+                                </label>
+                                <label class="card-option">
+                                    <input type="radio" name="start-time" value="late">
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"></path><path d="M12 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path><path d="M12 16v-4"></path></svg>
+                                        <strong data-translate-key="start_late">Sleeper</strong>
+                                        <span data-translate-key="start_late_span">(Start 11 AM+)</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label data-translate-key="label_end_time">I'm a...</label>
+                            <div class="card-select-group">
+                                <label class="card-option">
+                                    <input type="radio" name="end-time" value="early">
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"></path><path d="M12 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path><path d="M12 16v-4"></path></svg>
+                                        <strong data-translate-key="end_early">Early Night</strong>
+                                        <span data-translate-key="end_early_span">(End by 9 PM)</span>
+                                    </div>
+                                </label>
+                                <label class="card-option">
+                                    <input type="radio" name="end-time" value="normal" checked>
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.73 18.23c-1.15-1.0-2.6-1.48-4.18-1.48s-3.03.48-4.18 1.48a2.82 2.82 0 0 0-1.27 2.13c0 .1.01.19.03.29h10.84c.02-.1.03-.19.03-.29a2.82 2.82 0 0 0-1.27-2.13z"></path><path d="M12 2a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"></path></svg>
+                                        <strong data-translate-key="end_normal">Night Owl</strong>
+                                        <span data-translate-key="end_normal_span">(End by 11 PM)</span>
+                                    </div>
+                                </label>
+                                <label class="card-option">
+                                    <input type="radio" name="end-time" value="late">
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                                        <strong data-translate-key="end_late">All-Nighter</strong>
+                                        <span data-translate-key="end_late_span">(End after 1 AM)</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label data-translate-key="label_structure">How structured do you want your plan?</label>
+                            <div class="card-select-group">
+                                <label class="card-option">
+                                    <input type="radio" name="structure" value="full" checked>
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>
+                                        <strong data-translate-key="structure_full">Full Schedule</strong>
+                                        <span data-translate-key="structure_full_span">(Plan 9 AM - 9 PM)</span>
+                                    </div>
+                                </label>
+                                <label class="card-option">
+                                    <input type="radio" name="structure" value="flexible">
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>
+                                        <strong data-translate-key="structure_flexible">Flexible Plan</strong>
+                                        <span data-translate-key="structure_flexible_span">(Key activities + free time)</span>
+                                    </div>
+                                </label>
+                                <label class="card-option">
+                                    <input type="radio" name="structure" value="suggestions">
+                                    <div class="card-content-wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path><path d="M12 12l4 4"></path><path d="M12 12l-4-4"></path></svg>
+                                        <strong data-translate-key="structure_suggestions">Just Suggestions</strong>
+                                        <span data-translate-key="structure_suggestions_span">(A list of 'pins' I can choose from)</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: The Fun Stuff -->
+                    <div class="form-step" data-step="4">
+                        <h2 data-translate-key="step4_title">The fun stuff.</h2>
+                        <p class="step-subheading" data-translate-key="step4_subheading">Almost done! What are you most excited about?</p>
+
+                        <div class="form-group">
+                            <label data-translate-key="label_interests">Interests</label>
+                            <div class="checkbox-group" style="grid-template-columns: 1fr;">
+                                <label class="checkbox-label" style="display: block;">
+                                    <input type="checkbox" name="interests" value="foodie" onclick="toggleSubInterest(this, 'foodie-options')">
+                                    <span data-translate-key="interest_foodie">🍽️ Foodie</span>
+                                    
+                                    <div class="sub-interest-container" id="foodie-options">
+                                        <label data-translate-key="sublabel_foodie">What kind of "Foodie"? (Check all that apply)</label>
+                                        <label class="checkbox-label sub-option">
+                                            <input type="checkbox" name="sub-interest-food" value="street_food">
+                                            <span data-translate-key="interest_foodie_1">Street Food & Local Joints</span>
+                                        </label>
+                                        <label class="checkbox-label sub-option">
+                                            <input type="checkbox" name="sub-interest-food" value="fine_dining">
+                                            <span data-translate-key="interest_foodie_2">Fine Dining & "Must-Try" Restaurants</span>
+                                        </label>
+                                        <label class="checkbox-label sub-option">
+                                            <input type="checkbox" name="sub-interest-food" value="markets">
+                                            <span data-translate-key="interest_foodie_3">Cooking Classes & Food Markets</span>
+                                        </label>
+                                        <label class="checkbox-label sub-option">
+                                            <input type="checkbox" name="sub-interest-food" value="cafes">
+                                            <span data-translate-key="interest_foodie_4">Cozy Cafes & Breweries</span>
+                                        </label>
+                                    </div>
+                                </label>
+                                
+                                <label class="checkbox-label" style="display: block;">
+                                    <input type="checkbox" name="interests" value="culture" onclick="toggleSubInterest(this, 'culture-options')">
+                                    <span data-translate-key="interest_culture">🏛️ Culture Vulture</span>
+
+                                    <div class="sub-interest-container" id="culture-options">
+                                        <label data-translate-key="sublabel_culture">What kind of "Culture"? (Check all that apply)</label>
+                                        <label class="checkbox-label sub-option">
+                                            <input type="checkbox" name="sub-interest-culture" value="history">
+                                            <span data-translate-key="interest_culture_1">History & Ancient Sites</span>
+                                        </label>
+                                        <label class="checkbox-label sub-option">
+                                            <input type="checkbox" name="sub-interest-culture" value="art_museums">
+                                            <span data-translate-key="interest_culture_2">Art & Design Museums</span>
+                                        </label>
+                                        <label class="checkbox-label sub-option">
+                                            <input type="checkbox" name="sub-interest-culture" value="workshops">
+                                            <span data-translate-key="interest_culture_3">Local Workshops & Crafts</span>
+                                        </label>
+                                        <label class="checkbox-label sub-option">
+                                            <input type="checkbox" name="sub-interest-culture" value="music_theater">
+                                            <span data-translate-key="interest_culture_4">Music & Theater</span>
+                                        </label>
+                                    </div>
+                                </label>
+
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="interests" value="hidden">
+                                    <span data-translate-key="interest_hidden">💎 Hidden Gems</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="interests" value="nightlife">
+                                    <span data-translate-key="interest_nightlife">🌙 Nightlife</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="must-do" data-translate-key="label_must_do">One "Must-Do" (Optional)</label>
+                                <textarea id="must-do" data-translate-placeholder="placeholder_must_do" placeholder="e.g., 'See the Hagia Sophia'"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="avoid" data-translate-key="label_avoid">Anything to Avoid (Optional)</label>
+                                <textarea id="avoid" data-translate-placeholder="placeholder_avoid" placeholder="e.g., 'Large crowds, museums'"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label data-translate-key="label_diet">Food & Dietary Needs</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="diet" value="vegetarian">
+                                    <span data-translate-key="diet_vegetarian">Vegetarian</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="diet" value="vegan">
+                                    <span data-translate-key="diet_vegan">Vegan</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="diet" value="halal">
+                                    <span data-translate-key="diet_halal">Halal / Muslim</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="diet" value="gluten_free">
+                                    <span data-translate-key="diet_gluten_free">Gluten-Free</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="form-navigation">
+                        <button type="button" class="back-button" data-translate-key="btn_back">Back</button>
+                        <button type="button" class="next-button primary-button" data-translate-key="btn_next">Next</button>
+                        <button type="submit" class="primary-button submit-button" data-translate-key="btn_submit">Generate My Plan</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <script>
+        // --- DYNAMIC FORM LOGIC ---
+        function toggleChildOptions(radioInput) {
+            const childOptionsDiv = document.getElementById('child-options');
+            if (childOptionsDiv) {
+                childOptionsDiv.style.display = (radioInput.value === 'family' && radioInput.checked) ? 'block' : 'none';
+            }
+        }
+        function toggleCustomBudget(radioInput) {
+            const customBudgetDiv = document.getElementById('custom-budget-input');
+            if (customBudgetDiv) {
+                customBudgetDiv.style.display = (radioInput.value === 'custom' && radioInput.checked) ? 'block' : 'none';
+            }
+        }
+        function toggleSubInterest(checkbox, containerId) {
+            const subInterestDiv = document.getElementById(containerId);
+            if (subInterestDiv) {
+                subInterestDiv.style.display = checkbox.checked ? 'block' : 'none';
+            }
+        }
+        
+        // --- CORE SCRIPT (FIXED) ---
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM content loaded. Initializing script...");
+
+            // --- Language Handler ---
+            const langSelector = document.getElementById('language-selector');
+            const savedLang = (typeof getSavedLanguage === 'function') ? getSavedLanguage() : 'en'; 
+            
+            if (langSelector) {
+                langSelector.value = savedLang;
+                langSelector.addEventListener('change', () => {
+                    localStorage.setItem('vividLanguage', langSelector.value);
+                    location.reload();
+                });
+            } else {
+                console.error("Could not find #language-selector element!");
+            }
+            
+            if (typeof applyTranslations === 'function' && typeof translations === 'object') {
+                applyTranslations(savedLang);
+            } else {
+                console.error("translations.js file might be missing or failed to load.");
+            }
+
+            // --- Multi-Step Form Logic ---
+            const form = document.getElementById('trip-form');
+            const steps = Array.from(document.querySelectorAll('.form-step'));
+            const nextButtons = document.querySelectorAll('.next-button');
+            const backButtons = document.querySelectorAll('.back-button');
+            const progressSteps = Array.from(document.querySelectorAll('.progress-step'));
+            const submitButton = document.querySelector('.submit-button');
+            let currentStep = 1;
+
+            const updateSteps = () => {
+                steps.forEach(step => step.classList.toggle('active', parseInt(step.dataset.step) === currentStep));
+                progressSteps.forEach((step, index) => step.classList.toggle('active', index < currentStep));
+                
+                const backBtn = document.querySelector('.back-button');
+                const nextBtn = document.querySelector('.next-button');
+
+                if (backBtn) backBtn.style.display = (currentStep === 1) ? 'none' : 'block';
+                if (nextBtn) nextBtn.style.display = (currentStep === steps.length) ? 'none' : 'block';
+                if (submitButton) submitButton.style.display = (currentStep === steps.length) ? 'block' : 'none';
+            };
+
+            nextButtons.forEach(button => button.addEventListener('click', () => {
+                if (currentStep < steps.length) { currentStep++; updateSteps(); }
+            }));
+            backButtons.forEach(button => button.addEventListener('click', () => {
+                if (currentStep > 1) { currentStep--; updateSteps(); }
+            }));
+
+            // --- FORM SUBMISSION LOGIC ---
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    console.log("Form submission triggered!");
+                    
+                    const lang = (typeof getSavedLanguage === 'function') ? getSavedLanguage() : 'en';
+                    const dict = (typeof translations !== 'undefined' && translations[lang]) ? translations[lang] : translations['en'];
+
+                    if (submitButton) {
+                        submitButton.innerHTML = (dict && dict.btn_submit_loading) ? dict.btn_submit_loading : 'Generating...';
+                        submitButton.disabled = true;
+                    }
+
+                    const getCheckedValues = (name) => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
+
+                    const formData = {
+                        lang: lang,
+                        destination: document.getElementById('destination').value,
+                        startDate: document.getElementById('start-date').value,
+                        endDate: document.getElementById('end-date').value,
+                        accommodation: document.getElementById('accommodation').value,
+                        arrivalTime: document.getElementById('arrival-time').value,
+                        departureTime: document.getElementById('departure-time').value,
+                        travelWith: document.querySelector('input[name="travelWith"]:checked') ? document.querySelector('input[name="travelWith"]:checked').value : 'solo',
+                        childActivities: document.querySelector('input[name="child-activities"]') ? document.querySelector('input[name="child-activities"]').checked : false,
+                        childSpecialRequests: document.getElementById('child-special-requests').value,
+                        occasion: document.querySelector('input[name="occasion"]') ? document.querySelector('input[name="occasion"]').checked : false,
+                        budget: document.querySelector('input[name="budget"]:checked') ? document.querySelector('input[name="budget"]:checked').value : 'medium',
+                        customBudgetAmount: document.getElementById('custom-budget-amount').value,
+                        mobility: document.querySelector('input[name="mobility"]:checked') ? document.querySelector('input[name="mobility"]:checked').value : 'medium',
+                        startTime: document.querySelector('input[name="start-time"]:checked') ? document.querySelector('input[name="start-time"]:checked').value : 'normal',
+                        endTime: document.querySelector('input[name="end-time"]:checked') ? document.querySelector('input[name="end-time"]:checked').value : 'normal',
+                        structure: document.querySelector('input[name="structure"]:checked') ? document.querySelector('input[name="structure"]:checked').value : 'flexible',
+                        interests: getCheckedValues('interests'),
+                        subInterestsFood: getCheckedValues('sub-interest-food'),
+                        subInterestsCulture: getCheckedValues('sub-interest-culture'),
+                        mustDo: document.getElementById('must-do').value,
+                        avoid: document.getElementById('avoid').value,
+                        diet: getCheckedValues('diet')
+                    };
+                    
+                    console.log("Sending data to API:", formData);
+
+                    try {
+                        console.log("Calling /api/generatePlan...");
+                        const response = await fetch('/api/generatePlan', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(formData),
+                        });
+                        
+                        console.log("API Response Status:", response.status, response.statusText);
+                        
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            console.error("API Error Response Body:", errorData);
+                            throw new Error(errorData.error || `API Error: ${response.statusText}`);
+                        }
+
+                        const result = await response.json();
+                        console.log("API Success Response Body:", result);
+
+                        // --- THIS IS THE FIX ---
+                        // We are now looking for 'planJSON' which matches the backend.
+                        if (!result.planJSON) {
+                            console.error("Frontend Error: Received success but 'planJSON' key was missing!");
+                            throw new Error("Received empty plan from server.");
+                        }
+
+                        // We now save the JSON *string*
+                        localStorage.setItem('vividPlanText', result.planJSON);
+                        
+                        console.log("Plan saved to localStorage. Redirecting to plan.html...");
+
+                        // 5. Redirect to the plan page
+                        window.location.href = `plan.html?lang=${lang}`;
+
+                    } catch (error) {
+                        console.error('Failed to generate plan:', error);
+                        alert(`Error: Could not generate plan. \n\n${error.message}\n\nPlease check the console (F12) for more details.`);
+                        
+                        if (submitButton) {
+                            submitButton.innerHTML = (dict && dict.btn_submit) ? dict.btn_submit : 'Generate My Plan';
+                            submitButton.disabled = false;
+                        }
+                    }
+                });
+            } else {
+                console.error("Could not find #trip-form element!");
+            }
+
+            // Initialize the form state
+            updateSteps();
+            const travelWithRadio = document.querySelector('input[name="travelWith"]:checked');
+            if (travelWithRadio) {
+                toggleChildOptions(travelWithRadio);
+            }
+            const budgetRadio = document.querySelector('input[name="budget"]:checked');
+            if (budgetRadio) {
+                toggleCustomBudget(budgetRadio);
+            }
+        });
+    </script>
+</body>
+</html>
+

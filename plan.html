@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Vivid Plan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- translations.js must be loaded before the main script -->
+    <script src="translations.js"></script>
+    <!-- We no longer need marked.js -->
+</head>
+<body class="plan-page">
+    <nav class="top-nav">
+        <div class="logo">vivid</div>
+        <div class="nav-links">
+            <a href="#" class="nav-link" data-translate-key="plan_share">Share Plan</a>
+            <a href="#" class="nav-link" data-translate-key="plan_download">Download PDF</a>
+            <div class="language-selector-wrapper-nav">
+                <select id="language-selector">
+                    <option value="en">English (EN)</option>
+                    <option value="tr">Türkçe (TR)</option>
+                </select>
+            </div>
+        </div>
+    </nav>
+
+    <main class="plan-container">
+        <!-- This header will be filled by the AI's JSON data -->
+        <header class="plan-header" id="plan-header">
+            <!-- <h1>Your Vivid Plan: Istanbul</h1>
+            <p class="plan-dates">December 12 - 18, 2024</p> -->
+        </header>
+
+        <!-- The Tab buttons for navigation -->
+        <nav class="tab-nav" id="tab-nav">
+            <button class="tab-button active" data-tab="itinerary" data-translate-key="tab_itinerary">Daily Itinerary</button>
+            <button class="tab-button" data-tab="glance" data-translate-key="tab_glance">At-a-Glance</button>
+            <button class="tab-button" data-tab="packing" data-translate-key="tab_packing">Smart Packing List</button>
+            <button class="tab-button" data-tab="food" data-translate-key="tab_food">Food & Drink Guide</button>
+        </nav>
+
+        <!-- These are the "content" containers for each tab -->
+        <!-- The 'active' class controls visibility -->
+
+        <section class="tab-content content-section active" id="itinerary-content">
+            <!-- Daily Itinerary will be built here by JS -->
+            <p data-translate-key="loading_title">Generating your plan...</p>
+        </section>
+
+        <section class="tab-content content-section" id="glance-content">
+            <!-- At-a-Glance content will be built here by JS -->
+        </section>
+
+        <section class="tab-content content-section" id="packing-content">
+            <!-- Packing List content will be built here by JS -->
+        </section>
+
+        <section class="tab-content content-section" id="food-content">
+            <!-- Food Guide content will be built here by JS -->
+        </section>
+
+    </main>
+
+    <script>
+        // --- NEW: HTML BUILDER FUNCTIONS ---
+
+        // Builds the At-a-Glance tab
+        function buildAtAGlanceHTML(data) {
+            if (!data) return '<p>No "At-a-Glance" data provided.</p>';
+            
+            let dosAndDontsHTML = (data.dosAndDonts || []).map(item => `
+                <li class="${item.isDo ? 'do-item' : 'dont-item'}">
+                    <strong>${item.isDo ? 'DO:' : "DON'T:"}</strong> ${item.text}
+                </li>
+            `).join('');
+
+            return `
+                <div class="at-a-glance">
+                    <h2>☀️ <span data-translate-key="glance_weather">Live Weather & Vibe</span></h2>
+                    <p>${data.weatherVibe || 'No weather vibe provided.'}</p>
+                    <br>
+                    <h2>⚠️ <span data-translate-key="glance_dos">Key Do's & Don'ts</span></h2>
+                    <ul class="dos-donts-list">${dosAndDontsHTML}</ul>
+                </div>
+            `;
+        }
+
+        // Builds the Daily Itinerary tab (the big one)
+        function buildItineraryHTML(days) {
+            if (!days || days.length === 0) return '<p>No itinerary data provided.</p>';
+            
+            return days.map((day, index) => `
+                <div class="day-section">
+                    <div class="day-header" onclick="toggleDay(this)">
+                        <h2>${day.day} <span class="day-focus">${day.focus}</span></h2>
+                        <svg class="chevron" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <!-- Add 'expanded' class only to the first day -->
+                    <div class="day-content ${index === 0 ? 'expanded' : ''}">
+                        <div class="day-layout">
+                            <div class="map-column">
+                                <div class="map-placeholder">
+                                    <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                    <p data-translate-key="map_placeholder">Daily Route Map</p>
+                                </div>
+                                <a href="#" class="map-button" data-translate-key="map_button">View Route on Google Maps</a>
+                            </div>
+
+                            <div class="itinerary-column">
+                                <div class="route-summary">
+                                    <strong>Route Summary:</strong> ${day.routeSummary || ''}
+                                </div>
+                                <div class="timeline">
+                                    ${buildTimelineHTML(day.timelineItems)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Builds the individual timeline items for each day
+        function buildTimelineHTML(items) {
+            if (!items) return '';
+            let html = '';
+
+            items.forEach((item, index) => {
+                // Add the timeline item
+                html += `
+                    <div class="timeline-item">
+                        <div class="timeline-marker">${index + 1}</div>
+                        <div class="timeline-content">
+                            <div class="time-badge">${item.time || ''}</div>
+                            <h3>
+                                ${item.isFoodiePick ? '<span class="foodie-badge">🍽️ Foodie Pick</span>' : ''}
+                                ${item.title || 'Activity'}
+                            </h3>
+                            <p>${item.description || ''}</p>
+                            <div class="tags">
+                                ${(item.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                // Add the walking indicator *after* this item, if it exists
+                if (item.walkingDistance) {
+                    html += `
+                        <div class="walk-indicator">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                            </svg>
+                            <span>${item.walkingDistance}</span>
+                        </div>
+                    `;
+                }
+            });
+            return html;
+        }
+
+        // Builds the Packing List tab
+        function buildPackingListHTML(data) {
+            if (!data) return '<p>No packing list data provided.</p>';
+            
+            const clothingHTML = (data.clothing || []).map(item => `<li>${item}</li>`).join('');
+            const essentialsHTML = (data.essentials || []).map(item => `<li>${item}</li>`).join('');
+            const otherHTML = (data.other || []).map(item => `<li>${item}</li>`).join('');
+
+            return `
+                <div class="packing-list">
+                    <h2>👕 <span data-translate-key="packing_clothing">Clothing</span></h2>
+                    <ul>${clothingHTML}</ul>
+                    <br>
+                    <h2>🔌 <span data-translate-key="packing_essentials">Essentials</span></h2>
+                    <ul>${essentialsHTML}</ul>
+                    <br>
+                    ${otherHTML.length > 0 ? `<h2>✨ <span data-translate-key="packing_other">Other</span></h2><ul>${otherHTML}</ul>` : ''}
+                </div>
+            `;
+        }
+
+        // Builds the Food Guide tab
+        function buildFoodGuideHTML(items) {
+            if (!items || items.length === 0) return '<p>No food guide data provided.</p>';
+            
+            return items.map(item => `
+                <div class="food-guide-item">
+                    <h3>${item.name || 'Restaurant'} <span class="food-type">${item.type || ''}</span></h3>
+                    <p>${item.description || ''}</p>
+                </div>
+            `).join('');
+        }
+
+        // --- CORE SCRIPT ---
+        function toggleDay(header) {
+            const content = header.nextElementSibling;
+            const chevron = header.querySelector('.chevron');
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                chevron.style.transform = 'rotate(0deg)';
+            } else {
+                content.classList.add('expanded');
+                chevron.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Language Handler ---
+            const langSelector = document.getElementById('language-selector');
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlLang = urlParams.get('lang');
+            const savedLang = urlLang || localStorage.getItem('vividLanguage') || 'en';
+
+            langSelector.value = savedLang;
+            localStorage.setItem('vividLanguage', savedLang);
+
+            langSelector.addEventListener('change', () => {
+                localStorage.setItem('vividLanguage', langSelector.value);
+                location.reload();
+            });
+
+            // --- Plan Rendering Logic ---
+            const planText = localStorage.getItem('vividPlanText');
+            
+            const planHeader = document.getElementById('plan-header');
+            const itineraryContent = document.getElementById('itinerary-content');
+            const glanceContent = document.getElementById('glance-content');
+            const packingContent = document.getElementById('packing-content');
+            const foodContent = document.getElementById('food-content');
+
+            const dict = (typeof translations !== 'undefined' && translations[savedLang]) ? translations[savedLang] : translations['en'];
+
+            if (planText) {
+                try {
+                    // 1. Parse the JSON string from localStorage
+                    const planData = JSON.parse(planText);
+
+                    // 2. Populate Header
+                    planHeader.innerHTML = `
+                        <h1>${planData.planTitle || 'Your Vivid Plan'}</h1>
+                        <p class="plan-dates">${planData.planDates || ''}</p>
+                    `;
+
+                    // 3. Build and Inject HTML for each tab
+                    itineraryContent.innerHTML = buildItineraryHTML(planData.dailyItinerary);
+                    glanceContent.innerHTML = buildAtAGlanceHTML(planData.atAGlance);
+                    packingContent.innerHTML = buildPackingListHTML(planData.packingList);
+                    foodContent.innerHTML = buildFoodGuideHTML(planData.foodGuide);
+                    
+                    // 4. Initialize the first day as expanded
+                    const firstChevron = document.querySelector('.day-section:first-child .chevron');
+                    if (firstChevron) {
+                        firstChevron.style.transform = 'rotate(180deg)';
+                    }
+                
+                } catch (error) {
+                    console.error("Failed to parse AI plan JSON:", error);
+                    itineraryContent.innerHTML = `<h2>Error</h2><p>Failed to read the plan data. It might be corrupted.</p>`;
+                }
+            } else {
+                // Show an error if no plan was found in localStorage
+                itineraryContent.innerHTML = `
+                    <h2>Error</h2>
+                    <p>${dict.loading_text || "No plan found. Please go back and try again."}</p>
+                `;
+            }
+
+            // --- Tab Switching Logic ---
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabName = button.dataset.tab;
+
+                    // Update button active state
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    // Update content active state
+                    tabContents.forEach(content => {
+                        if (content.id === `${tabName}-content`) {
+                            content.classList.add('active');
+                        } else {
+                            content.classList.remove('active');
+                        }
+                    });
+                });
+            });
+
+            // Finally, apply translations to all the new content
+            applyTranslations(savedLang);
+        });
+    </script>
+</body>
+</html>
+
