@@ -72,7 +72,7 @@ Generate a complete, multi-day travel plan based on the following user data.
 **Core Logistics:**
 * **Destination:** ${formData.destination}
 * **Dates:** ${formData.startDate} to ${formData.endDate}
-* **Accommodation:** ${formData.accommodation}
+* **Accommodation:** ${formData.accommodation} (This is the user's "Home Base" for all routes)
 * **Arrival Time:** ${formData.arrivalTime || 'Not specified. Assume a full first day.'}
 * **Departure Time:** ${formData.departureTime || 'Not specified. Assume a full last day.'}
 
@@ -96,16 +96,35 @@ ${buildSubInterestPrompt(formData)}
 * **Dietary Needs:** ${formData.diet ? formData.diet.join(', ') : 'None specified.'}
 
 ---
-### INSTRUCTIONS
+### CRITICAL INSTRUCTIONS (NEW)
 ---
-Generate a JSON object matching the schema I provide. Be detailed and specific. Use the user's accommodation as the start/end point for daily routes. Acknowledge their arrival/departure times.
-Create a "routeSummary" for each day.
-Create "walkingDistance" strings (e.g., "Walk 5 min (300m)") between timeline items that are close.
-If an item is a "Foodie" pick, set "isFoodiePick" to true.
+You MUST use your Google Search tool to find hyper-specific, real-world information. "Generic" answers are forbidden.
+
+1.  **TRANSPORT:**
+    * **BAD:** "Take public transport to Taksim."
+    * **GOOD:** "From your hotel in Kağıthane, walk 5 minutes to the 'Kağıthane Park' bus stop. Take bus **48N** (direction Taksim). Get off at the 'Taksim' stop (approx. 8 stops, 25 mins)."
+    * **ACTION:** You MUST find actual bus, tram, or metro line numbers and real stop names.
+2.  **COSTS:**
+    * **BAD:** "A bus ticket is cheap."
+    * **GOOD:** "The bus fare is approx. **40 TL** (you must use an IstanbulKart)."
+    * **ACTION:** You MUST search for and provide estimated costs for transport, tickets, and meals in the local currency.
+3.  **RESTAURANTS:**
+    * **BAD:** "Find a local restaurant for meatballs."
+    * **GOOD:** "Go to **'Tarihi Sultanahmet Köftecisi Selim Usta'**. It's a 2-min walk from the Blue Mosque."
+    * **ACTION:** You MUST recommend specific, real restaurant names that match the user's budget and diet.
+4.  **DIRECTIONS:**
+    * **BAD:** "Walk to Istiklal Caddesi."
+    * **GOOD:** "From Taksim Square, walk 2 minutes south to the start of Istiklal Caddesi."
+    * **ACTION:** Provide clear, simple walking directions (e.g., "Walk 5 minutes...", "It's a 2km walk...") between stops.
+
+Generate a JSON object matching the schema I provide. Be detailed and specific.
 `;
     return prompt;
 }
 
+// --- UPDATED JSON SCHEMA ---
+// I've added "transportDetails" and "estimatedCost" to the timeline
+// and "estimatedPrice" to the food guide.
 const aiResponseSchema = {
     "type": "OBJECT",
     "properties": {
@@ -145,7 +164,9 @@ const aiResponseSchema = {
                                 "description": { "type": "STRING" },
                                 "isFoodiePick": { "type": "BOOLEAN" },
                                 "tags": { "type": "ARRAY", "items": { "type": "STRING" } },
-                                "walkingDistance": { "type": "STRING" }
+                                "walkingDistance": { "type": "STRING" },
+                                "transportDetails": { "type": "STRING" }, // NEW
+                                "estimatedCost": { "type": "STRING" } // NEW
                             }
                         }
                     }
@@ -167,7 +188,8 @@ const aiResponseSchema = {
                 "properties": {
                     "name": { "type": "STRING" },
                     "type": { "type": "STRING" },
-                    "description": { "type": "STRING" }
+                    "description": { "type": "STRING" },
+                    "estimatedPrice": { "type": "STRING" } // NEW
                 }
             }
         }
@@ -204,15 +226,20 @@ export default async function handler(request, response) {
         console.log("[API] Calling Google Gemini API...");
         
         // --- UPDATED PAYLOAD ---
-        // We now tell the AI to *only* respond with JSON matching our schema
+        // We are now enabling the Google Search tool AND
+        // forcing the AI to respond with our JSON schema.
         const payload = {
             contents: [{
                 parts: [{ text: finalPrompt }]
             }],
+            // NEW: Add the Google Search tool
+            tools: [{
+                "google_search": {}
+            }],
             generationConfig: {
                 responseMimeType: "application/json",
                 responseSchema: aiResponseSchema,
-                temperature: 0.8,
+                temperature: 0.7, // Slightly lower temp for more factual answers
                 topK: 1,
                 topP: 1,
                 maxOutputTokens: 8192,
@@ -242,9 +269,7 @@ export default async function handler(request, response) {
             return response.status(500).json({ error: 'Invalid response from AI' });
         }
 
-        // --- NEW FIX: CLEAN THE JSON ---
-        // This finds the first "{" and the last "}" to extract the
-        // JSON object, in case the AI wraps it in text or markdown.
+        // --- FIX: CLEAN THE JSON ---
         const jsonStartIndex = generatedText.indexOf('{');
         const jsonEndIndex = generatedText.lastIndexOf('}');
         
@@ -253,10 +278,8 @@ export default async function handler(request, response) {
             return response.status(500).json({ error: 'AI response was not valid JSON.' });
         }
 
-        // Extract the clean JSON string
         const cleanJsonString = generatedText.substring(jsonStartIndex, jsonEndIndex + 1);
         
-        // Let's test if it's valid JSON before sending
         try {
             JSON.parse(cleanJsonString);
         } catch (parseError) {
@@ -268,7 +291,6 @@ export default async function handler(request, response) {
         // --- END OF FIX ---
 
         console.log("[API] Successfully generated and cleaned JSON. Sending 200 OK.");
-        // Send the *clean* JSON string to the frontend
         return response.status(200).json({ planJSON: cleanJsonString });
 
     } catch (error) {
