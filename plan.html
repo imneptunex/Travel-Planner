@@ -8,13 +8,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <!-- translations.js must be loaded before the main script -->
     <script src="translations.js"></script>
-    <!-- We no longer need marked.js -->
 </head>
 <body class="plan-page">
     <nav class="top-nav">
-        <div class="logo">vivid</div>
+        <div class="logo">neptune</div>
         <div class="nav-links">
             <a href="#" class="nav-link" data-translate-key="plan_share">Share Plan</a>
             <a href="#" class="nav-link" data-translate-key="plan_download">Download PDF</a>
@@ -28,9 +26,9 @@
     </nav>
 
     <main class="plan-container">
-        <!-- This header will be filled by the AI's JSON data -->
+       
         <header class="plan-header" id="plan-header">
-            <!-- <h1>Your Vivid Plan: Istanbul</h1>
+            <!-- <h1>Your Plan: Istanbul</h1>
             <p class="plan-dates">December 12 - 18, 2024</p> -->
         </header>
 
@@ -65,14 +63,14 @@
     </main>
 
     <script>
-        // --- ************ PASTE YOUR KEY HERE ************ ---
-        const GOOGLE_MAPS_API_KEY = "AIzaSyDK2BakuMIqzgl80o6eKsbUnGMwakCl324"; // PASTE YOUR GOOGLE MAPS API KEY HERE
-        // --- ********************************************* ---
+      
+        const GOOGLE_MAPS_API_KEY = "AIzaSyDK2BakuMIqzgl80o6eKsbUnGMwakCl324"; // This is the google maps API key to create map embeds
+       
 
 
-        // --- HTML BUILDER FUNCTIONS (UPDATED) ---
+        // --- HTML BUILDER FUNCTIONS---
 
-        // Builds the At-a-Glance tab
+        // Builds the At-a-Glance 
         function buildAtAGlanceHTML(data) {
             if (!data) return '<p>No "At-a-Glance" data provided.</p>';
             
@@ -93,7 +91,7 @@
             `;
         }
 
-        // --- UPDATED: This function now builds the map URLs ---
+        // This function builds the map URLs ---
         // Builds the Daily Itinerary tab (the big one)
         function buildItineraryHTML(days) {
             if (!days || days.length === 0) return '<p>No itinerary data provided.</p>';
@@ -142,7 +140,7 @@
             `}).join('');
         }
 
-        // --- NEW: Helper function to build Google Maps URLs ---
+        // --- Helper function to build Google Maps URLs ---
         function buildMapURLs(items) {
             if (!items || items.length === 0) {
                 return { embedUrl: '', externalUrl: '' };
@@ -274,7 +272,7 @@
             `).join('');
         }
 
-        // --- CORE SCRIPT ---
+        // --- CORE ---
         function toggleDay(header) {
             const content = header.nextElementSibling;
             const chevron = header.querySelector('.chevron');
@@ -293,7 +291,7 @@
             const langSelector = document.getElementById('language-selector');
             const urlParams = new URLSearchParams(window.location.search);
             const urlLang = urlParams.get('lang');
-            // Use getSavedLanguage() from translations.js
+            // Use translations from translations.js
             const savedLang = urlLang || (typeof getSavedLanguage === 'function' ? getSavedLanguage() : 'en');
 
             if (langSelector) {
@@ -334,7 +332,7 @@
                     // 2. Populate Header
                     if (planHeader) {
                         planHeader.innerHTML = `
-                            <h1>${planData.planTitle || 'Your Vivid Plan'}</h1>
+                            <h1>${planData.planTitle || 'Your Travel Plan'}</h1>
                             <p class="plan-dates">${planData.planDates || ''}</p>
                         `;
                     }

@@ -1,8 +1,5 @@
-import 'dotenv/config'; // Loads .env file variables for local testing
+import 'dotenv/config';
 
-// --- THIS IS THE FULL JSON SCHEMA WE WILL ASK THE AI TO FOLLOW ---
-// We define it here so we can include it in the prompt.
-// NEW: Added "googleMapsQuery"
 const aiResponseSchemaText = `{
     "type": "OBJECT",
     "properties": {
@@ -70,7 +67,7 @@ const aiResponseSchemaText = `{
 }`;
 
 
-// This helper function builds the prompt from all the form data.
+// This function builds the prompt from all the form data.
 function buildMegaprompt(formData) {
     // --- Helper functions to make the prompt smarter ---
     function buildFamilyPrompt(data) {
@@ -127,8 +124,8 @@ function buildMegaprompt(formData) {
         return prompt;
     }
 
-    // --- Main Prompt Assembly ---
-    let prompt = `You are 'Vivid', a world-class AI travel concierge. Your expertise is in creating hyper-personalized, authentic, and logistically sound travel plans.
+    // --- Main Prompt  ---
+    let prompt = `You are 'neptune', a world-class AI travel concierge. Your expertise is in creating hyper-personalized, authentic, and logistically sound travel plans.
 
 Your ENTIRE response MUST be a single, valid JSON object. Do NOT include any text, markdown formatting, or "json" tags before or after the JSON.
 You must respond in the language with this code: ${formData.lang || 'en'}.
@@ -225,9 +222,7 @@ export default async function handler(request, response) {
 
         console.log("[API] Calling Google Gemini API with Google Search enabled...");
         
-        // --- UPDATED PAYLOAD ---
-        // We have ADDED the "tools" key and REMOVED "responseMimeType" and "responseSchema".
-        // The prompt itself now contains the JSON schema instructions.
+     
         const payload = {
             contents: [{
                 parts: [{ text: finalPrompt }]
@@ -236,13 +231,11 @@ export default async function handler(request, response) {
                 "google_search": {}
             }],
             generationConfig: {
-                // We cannot use JSON mode + Tools, so we rely on the prompt
-        // and our string cleaning logic.
+   
         temperature: 0.7, 
         topK: 1,
         topP: 1,
-        // --- THIS IS THE FIX ---
-        // Increased token limit to allow for longer, more detailed plans.
+     
         maxOutputTokens: 16384,
     }
 };
@@ -270,8 +263,7 @@ export default async function handler(request, response) {
             return response.status(500).json({ error: 'Invalid response from AI' });
         }
 
-        // --- FIX: CLEAN THE JSON ---
-        // This is now CRITICAL because we are not in JSON-only mode.
+        
         const jsonStartIndex = generatedText.indexOf('{');
         const jsonEndIndex = generatedText.lastIndexOf('}');
         
@@ -290,7 +282,7 @@ export default async function handler(request, response) {
             console.error('--- Cleaned Text ---', cleanJsonString);
             return response.status(500).json({ error: 'Failed to parse AI JSON response.' });
         }
-        // --- END OF FIX ---
+        
 
         console.log("[API] Successfully generated and cleaned JSON. Sending 200 OK.");
         return response.status(200).json({ planJSON: cleanJsonString });
