@@ -1,6 +1,6 @@
-**Vivid: The AI Travel Planner ✈️**
+**Neptune: The AI Travel Planner ✈️**
 
-Vivid is a "smart" travel itinerary generator that moves beyond generic lists. It uses Google Gemini, powered by Google Search, to build a complete, hyper-personalized, and actionable travel plan based on a conversational, multi-step user form.
+Neptune is a "smart" travel itinerary generator that moves beyond generic lists. It uses Google Gemini, powered by Google Search, to build a complete, hyper-personalized, and actionable travel plan based on a conversational, multi-step user form.
 
 This app understands your unique travel style—from your budget and mobility needs to your specific culinary interests—and generates a plan that includes real bus routes, actual restaurant names, estimated costs, and dynamic daily route maps.
 
